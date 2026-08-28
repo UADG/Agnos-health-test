@@ -27,6 +27,8 @@ The source code is organized to decouple the business logic from external framew
 ├── init.sql            # Database schema and mock data seeding
 └── docker-compose.yml  # Infrastructure as Code
 
+```
+
 🛠 Prerequisites
 Docker and Docker Compose installed on your machine.
 No need to install Go or PostgreSQL locally; Docker handles everything.
