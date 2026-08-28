@@ -8,9 +8,6 @@ import (
 	"agnos-assignment/usecase"
 )
 
-// ==========================================
-// 1. สร้าง Mock สำหรับ Patient Repo และ HIS Client
-// ==========================================
 
 type mockPatientRepo struct {
 	mockSearch func(ctx context.Context, hospitalID string, criteria domain.PatientSearchCriteria) ([]*domain.Patient, error)
@@ -32,15 +29,10 @@ func (m *mockHISClient) FetchPatientByID(ctx context.Context, id string) (*domai
 	return m.mockFetch(ctx, id)
 }
 
-// ==========================================
-// 2. Test Cases สำหรับ SearchPatients
-// ==========================================
-
-// เคสที่ 1: ค้นหาใน Database เราเจอเลย (ไม่ต้องเรียก HIS API)
 func TestSearchPatients_FoundInDB(t *testing.T) {
 	mockRepo := &mockPatientRepo{
 		mockSearch: func(ctx context.Context, hospitalID string, criteria domain.PatientSearchCriteria) ([]*domain.Patient, error) {
-			// จำลองว่าเจอคนไข้ 1 คน
+			
 			return []*domain.Patient{{ID: "1", FirstNameTH: "สมชาย"}}, nil
 		},
 	}
@@ -62,20 +54,19 @@ func TestSearchPatients_FoundInDB(t *testing.T) {
 	}
 }
 
-// เคสที่ 2: ค้นหาใน DB ไม่เจอ และส่ง NationalID มา -> ต้องไปเรียก HIS API แล้วเซฟลง DB
 func TestSearchPatients_NotFoundInDB_FetchFromHIS(t *testing.T) {
 	mockRepo := &mockPatientRepo{
 		mockSearch: func(ctx context.Context, hospitalID string, criteria domain.PatientSearchCriteria) ([]*domain.Patient, error) {
-			return []*domain.Patient{}, nil // คืนค่า Array ว่าง (ไม่เจอใน DB)
+			return []*domain.Patient{}, nil 
 		},
 		mockCreate: func(ctx context.Context, patient *domain.Patient) error {
-			return nil // จำลองว่าเซฟลง DB สำเร็จ
+			return nil 
 		},
 	}
 	
 	mockHIS := &mockHISClient{
 		mockFetch: func(ctx context.Context, id string) (*domain.Patient, error) {
-			// จำลองว่า HIS API เจอคนไข้
+			
 			return &domain.Patient{ID: "2", NationalID: "1234567890123"}, nil
 		},
 	}
@@ -91,7 +82,6 @@ func TestSearchPatients_NotFoundInDB_FetchFromHIS(t *testing.T) {
 	}
 }
 
-// เคสที่ 3: ค้นหาด้วยชื่อ (ไม่มี ID) ใน DB ไม่เจอ -> ต้องไม่เรียก HIS API (คืนค่าว่างเลย)
 func TestSearchPatients_NotFoundInDB_NoIDProvided(t *testing.T) {
 	mockRepo := &mockPatientRepo{
 		mockSearch: func(ctx context.Context, hospitalID string, criteria domain.PatientSearchCriteria) ([]*domain.Patient, error) {

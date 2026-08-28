@@ -35,18 +35,15 @@ type PatientSearchCriteria struct {
 	Email       string
 }
 
-// PatientRepository ใช้จัดการข้อมูลผู้ป่วยในฐานข้อมูลของเราเอง
 type PatientRepository interface {
 	Search(ctx context.Context, hospitalID string, criteria PatientSearchCriteria) ([]*Patient, error)
 	Create(ctx context.Context, patient *Patient) error
 }
 
-// HISClient ใช้สำหรับเชื่อมต่อกับ API ภายนอก (Hospital A API)
 type HISClient interface {
-	FetchPatientByID(ctx context.Context, id string) (*Patient, error) // id สามารถเป็น national_id หรือ passport_id
+	FetchPatientByID(ctx context.Context, id string) (*Patient, error) 
 }
 
-// PatientUsecase จัดการ Business Logic ในการค้นหา (อาจจะหาใน DB ก่อน ถ้าไม่มีค่อยยิง HIS)
 type PatientUsecase interface {
 	SearchPatients(ctx context.Context, hospitalID string, criteria PatientSearchCriteria) ([]*Patient, error)
 }

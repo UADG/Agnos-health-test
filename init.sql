@@ -1,31 +1,25 @@
--- ใช้ gen_random_uuid() สำหรับสร้าง UUID อัตโนมัติ (รองรับ PostgreSQL 13+)
-
--- 1. ตารางโรงพยาบาล (Hospitals)
 CREATE TABLE hospitals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    code VARCHAR(50) UNIQUE NOT NULL, -- เช่น 'HOSPITAL_A'
+    code VARCHAR(50) UNIQUE NOT NULL, 
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. ตารางพนักงาน (Staff)
 CREATE TABLE staff (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL, -- ต้องเก็บเป็นค่า Hash (เช่น bcrypt) ห้ามเก็บ Plain Text
+    password_hash VARCHAR(255) NOT NULL, 
     hospital_id UUID NOT NULL REFERENCES hospitals(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. ตารางผู้ป่วย (Patients)
--- รองรับโครงสร้างข้อมูลที่ดึงมาจาก Hospital A API
 CREATE TABLE patients (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     hospital_id UUID NOT NULL REFERENCES hospitals(id) ON DELETE CASCADE,
     
-    patient_hn VARCHAR(50) NOT NULL, -- Hospital Number
+    patient_hn VARCHAR(50) NOT NULL, 
     national_id VARCHAR(20),
     passport_id VARCHAR(50),
     
@@ -40,30 +34,21 @@ CREATE TABLE patients (
     date_of_birth DATE,
     phone_number VARCHAR(20),
     email VARCHAR(255),
-    gender CHAR(1) CHECK (gender IN ('M', 'F')), -- บังคับให้กรอกแค่ M หรือ F
+    gender CHAR(1) CHECK (gender IN ('M', 'F')), 
     
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
-    -- เงื่อนไข: ใน 1 โรงพยาบาล จะต้องไม่มีรหัสผู้ป่วย (HN) ซ้ำกัน
     UNIQUE (hospital_id, patient_hn) 
 );
 
--- ==========================================
--- สร้าง INDEX สำหรับปรับปรุงความเร็วในการค้นหา (Optimization)
--- สำคัญมากสำหรับ API: /patient/search ที่รับ Optional Parameters
--- ==========================================
-
--- Index สำหรับค้นหาผู้ป่วยในโรงพยาบาลเดียวกัน
 CREATE INDEX idx_patients_hospital_id ON patients(hospital_id);
 
--- Index สำหรับช่องค้นหาหลักตามโจทย์
 CREATE INDEX idx_patients_national_id ON patients(national_id);
 CREATE INDEX idx_patients_passport_id ON patients(passport_id);
 CREATE INDEX idx_patients_phone ON patients(phone_number);
 CREATE INDEX idx_patients_email ON patients(email);
 
--- Index สำหรับค้นหาชื่อ-นามสกุล (ทำแบบ Composite เผื่อการค้นหาร่วมกัน)
 CREATE INDEX idx_patients_name_en ON patients(first_name_en, last_name_en);
 CREATE INDEX idx_patients_name_th ON patients(first_name_th, last_name_th);
 
