@@ -1,0 +1,45 @@
+# =========================
+# 1. Go binaries & tools
+# =========================
+main
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# =========================
+# 2. Security & Secrets
+# =========================
+.env
+.env.*
+*.pem
+*.key
+
+# =========================
+# 3. OS specific files
+# =========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =========================
+# 4. IDEs and Editors
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# 5. Database Data
+# =========================
+pgdata/
+db_data/
